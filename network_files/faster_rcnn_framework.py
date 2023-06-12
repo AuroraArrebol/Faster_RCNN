@@ -72,7 +72,7 @@ class FasterRCNNBase(nn.Module):
                     raise ValueError("Expected target boxes to be of type "
                                      "Tensor, got {:}.".format(type(boxes)))
 
-        original_image_sizes = torch.jit.annotate(List[Tuple[int, int]], [])
+        original_image_sizes = torch.jit.annotate(List[Tuple[int, int]], []) # 存放原始图片的尺寸
         for img in images:
             val = img.shape[-2:]
             assert len(val) == 2  # 防止输入的是个一维向量
@@ -260,18 +260,18 @@ class FasterRCNN(FasterRCNNBase):
                  box_roi_pool=None, box_head=None, box_predictor=None,
                  # 移除低目标概率      fast rcnn中进行nms处理的阈值   对预测结果根据score排序取前100个目标
                  box_score_thresh=0.05, box_nms_thresh=0.5, box_detections_per_img=100,
-                 box_fg_iou_thresh=0.5, box_bg_iou_thresh=0.5,   # fast rcnn计算误差时，采集正负样本设置的阈值
+                 box_fg_iou_thresh=0.5, box_bg_iou_thresh=0.5,   # fast rcnn计算误差【时，采集正负样本设置的阈值
                  box_batch_size_per_image=512, box_positive_fraction=0.25,  # fast rcnn计算误差时采样的样本数，以及正样本占所有样本的比例
                  bbox_reg_weights=None):
-        if not hasattr(backbone, "out_channels"):
+        if not hasattr(backbone, "out_channels"): # 判断backbone有没有参数out_channels，没有则报错
             raise ValueError(
                 "backbone should contain an attribute out_channels"
                 "specifying the number of output channels  (assumed to be the"
                 "same for all the levels"
             )
 
-        assert isinstance(rpn_anchor_generator, (AnchorsGenerator, type(None)))
-        assert isinstance(box_roi_pool, (MultiScaleRoIAlign, type(None)))
+        assert isinstance(rpn_anchor_generator, (AnchorsGenerator, type(None))) # 判断rpn_anchor_generator是否属于AnchorsGenerator类
+        assert isinstance(box_roi_pool, (MultiScaleRoIAlign, type(None))) # 判断box_roi_pool是否属于这一类
 
         if num_classes is not None:
             if box_predictor is not None:
@@ -287,8 +287,8 @@ class FasterRCNN(FasterRCNNBase):
 
         # 若anchor生成器为空，则自动生成针对resnet50_fpn的anchor生成器
         if rpn_anchor_generator is None:
-            anchor_sizes = ((32,), (64,), (128,), (256,), (512,))
-            aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
+            anchor_sizes = ((32,), (64,), (128,), (256,), (512,))#resnet50_fpn有多个feature_map，因此需要在每个尺度生产不同尺寸的anchor
+            aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes) # 元组乘数字->元组重复五次
             rpn_anchor_generator = AnchorsGenerator(
                 anchor_sizes, aspect_ratios
             )
@@ -315,7 +315,7 @@ class FasterRCNN(FasterRCNNBase):
         #  Multi-scale RoIAlign pooling
         if box_roi_pool is None:
             box_roi_pool = MultiScaleRoIAlign(
-                featmap_names=['0', '1', '2', '3'],  # 在哪些特征层进行roi pooling
+                featmap_names=['0', '1', '2', '3'], # 在哪些特征层进行roi pooling(这是对于resnet而言的)，加不加’pool‘层影响不大
                 output_size=[7, 7],
                 sampling_ratio=2)
 

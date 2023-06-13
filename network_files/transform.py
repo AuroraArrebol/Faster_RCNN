@@ -285,8 +285,11 @@ def resize_boxes(boxes, original_size, new_size):
     ymax = ymax * ratios_height
     return torch.stack((xmin, ymin, xmax, ymax), dim=1)
 
-
-
+# if __name__=='__main__':
+#     t=GeneralizedRCNNTransform(300,300,0.5,0.5)
+#     images=torch.ones((10,3,300,400))
+#     s=t.batch_images(images, size_divisible = 32)
+#     print(1)
 
 
 

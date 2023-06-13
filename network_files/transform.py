@@ -242,16 +242,16 @@ class GeneralizedRCNNTransform(nn.Module):
             if image.dim() != 3:
                 raise ValueError("images is expected to be a list of 3d tensors "
                                  "of shape [C, H, W], got {}".format(image.shape))
-            image = self.normalize(image)                # 对图像进行标准化处理
-            image, target_index = self.resize(image, target_index)   # 对图像和对应的bboxes缩放到指定范围
+            image = self.normalize(image)                            # 对图像进行标准化处理
+            image, target_index = self.resize(image, target_index)   # 对图像和对应的bboxes缩放到指定范围之内
             images[i] = image
             if targets is not None and target_index is not None:
                 targets[i] = target_index
 
         # 记录resize后的图像尺寸
-        image_sizes = [img.shape[-2:] for img in images]
-        images = self.batch_images(images)  # 将images打包成一个batch
-        image_sizes_list = torch.jit.annotate(List[Tuple[int, int]], [])
+        image_sizes = [img.shape[-2:] for img in images]            #resize之后的图像尺寸列表
+        images = self.batch_images(images)  # 将images打包成一个batch，这里的图像经过了padding操作，每张图片的长宽是一样大的
+        image_sizes_list = torch.jit.annotate(List[Tuple[int, int]], []) #存放image在resize之后的尺寸信息
 
         for image_size in image_sizes:
             assert len(image_size) == 2
